@@ -9,6 +9,7 @@ app.use(cors());
 
 // Initialize Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+console.log(process.env.GEMINI_API_KEY)
 
 const generatePrompt = (data) => {
   const { productName, description, techStack, audience, platform } = data;
@@ -42,7 +43,7 @@ app.post('/api/generate', async (req, res) => {
       return res.status(400).json({ error: "Missing fields" });
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" }); // Updated model
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" }); // Updated model
     const prompt = generatePrompt(req.body);
 
     const result = await model.generateContent(prompt);
