@@ -13,12 +13,11 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const generatePrompt = (data) => {
   const { productName, description, techStack, audience, platform } = data;
 
-  // We ask for JSON specifically
   return `
     Act as a senior marketing expert for developers.
     Product: ${productName}
     Description: ${description}
-    Tech Stack: ${techStack}
+    Tech Stack: ${techStack || 'Not specified'}
     Target Audience: ${audience}
     Platform: ${platform}
 
@@ -43,7 +42,7 @@ app.post('/api/generate', async (req, res) => {
       return res.status(400).json({ error: "Missing fields" });
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" }); // Updated model
     const prompt = generatePrompt(req.body);
 
     const result = await model.generateContent(prompt);
@@ -64,31 +63,9 @@ app.post('/api/generate', async (req, res) => {
   }
 });
 
-app.post('/api/generate', async (req, res) => {
-  try {
-    const { productName, description, techStack, audience, platform } = req.body;
-
-    if (!productName || !description || !platform) {
-      return res.status(400).json({ error: "Missing required fields" });
-    }
-
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-    const prompt = generatePrompt(req.body);
-
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
-
-    res.json({ success: true, content: text });
-
-  } catch (error) {
-    console.error("AI Error:", error);
-    res.status(500).json({ error: "Failed to generate content" });
-  }
-});
-
 const PORT = process.env.PORT || 5000;
 
+// Only listen when running locally, Vercel handles this automatically in production
 if (require.main === module) {
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 }
